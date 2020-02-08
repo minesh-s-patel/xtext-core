@@ -42,18 +42,23 @@ public class WriteRequest<U, V> extends AbstractRequest<V> {
 		try {
 			previous.join();
 		} catch (Throwable t) {
-			// We are not interested in results, only to make sure that all previous requests are finished before running next write request.
+			if (!requestManager.isCancelException(t)) {
+				LOG.error("Error during request: ", t);
+			}
 		}
 		try {
 			U intermediateResult = this.nonCancellable.apply();
 			cancelIndicator.checkCanceled();
-			result.complete(cancellable.apply(cancelIndicator, intermediateResult));
+			V writeResult = cancellable.apply(cancelIndicator, intermediateResult);
+			complete(writeResult);
 		} catch (Throwable t) {
-			if (!requestManager.isCancelException(t)) {
-				LOG.error("Error during request: ", t);
-			}
-			result.completeExceptionally(t);
+			completeExceptionally(t);
 		}
+	}
+	
+	@Override
+	Logger getLogger() {
+		return LOG;
 	}
 
 }

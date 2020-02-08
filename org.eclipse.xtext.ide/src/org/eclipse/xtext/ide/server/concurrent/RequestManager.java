@@ -51,18 +51,26 @@ public class RequestManager {
 		parallel.shutdown();
 		cancel();
 	}
+	
+	protected void setParallel(ExecutorService parallel) {
+		this.parallel = parallel;
+	}
+	
+	protected void setOperationCanceledManager(OperationCanceledManager operationCanceledManager) {
+		this.operationCanceledManager = operationCanceledManager;
+	}
 
 	/**
 	 * Run the given cancellable logic as a read request.
 	 */
-	public <V> CompletableFuture<V> runRead(Function1<? super CancelIndicator, ? extends V> cancellable) {
+	public synchronized <V> CompletableFuture<V> runRead(Function1<? super CancelIndicator, ? extends V> cancellable) {
 		return submit(new ReadRequest<>(this, cancellable, parallel));
 	}
 
 	/**
 	 * Perform the given write and run the cancellable logic afterwards.
 	 */
-	public <U, V> CompletableFuture<V> runWrite(
+	public synchronized <U, V> CompletableFuture<V> runWrite(
 			Function0<? extends U> nonCancellable,
 			Function2<? super CancelIndicator, ? super U, ? extends V> cancellable) {
 		return submit(new WriteRequest<>(this, nonCancellable, cancellable, cancel()));
@@ -72,9 +80,19 @@ public class RequestManager {
 	 * Submit the given request.
 	 */
 	protected <V> CompletableFuture<V> submit(AbstractRequest<V> request) {
-		requests.add(request);
-		queue.submit(request);
+		addRequest(request);
+		submitRequest(request);
 		return request.get();
+	}
+
+	/* @ProtectedForTesting */
+	protected void submitRequest(AbstractRequest<?> request) {
+		queue.submit(request);
+	}
+
+	/* @ProtectedForTesting */
+	protected void addRequest(AbstractRequest<?> request) {
+		requests.add(request);
 	}
 
 	/**
