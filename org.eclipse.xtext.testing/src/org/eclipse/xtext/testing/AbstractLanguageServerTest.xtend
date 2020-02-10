@@ -135,7 +135,7 @@ abstract class AbstractLanguageServerTest implements Endpoint {
 		Modules2.mixin(new ServerModule, [
 			bind(RequestManager).toInstance(new RequestManager() {
 
-				override <V> runRead((CancelIndicator)=>V request) {
+				override synchronized < V> runRead((CancelIndicator)=>V request) {
 					val result = new CompletableFuture()
 					try {
 						result.complete(request.apply [ false ])
@@ -145,7 +145,7 @@ abstract class AbstractLanguageServerTest implements Endpoint {
 					return result
 				}
 
-				override <U,V> runWrite(()=>U nonCancellable, (CancelIndicator, U)=>V request) {
+				override synchronized < U,V> runWrite(()=>U nonCancellable, (CancelIndicator, U)=>V request) {
 					val result = new CompletableFuture()
 					try {
 						result.complete(request.apply([ false ], nonCancellable.apply()))

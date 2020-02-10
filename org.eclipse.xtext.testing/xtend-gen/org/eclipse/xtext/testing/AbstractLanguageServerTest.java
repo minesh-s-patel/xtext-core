@@ -234,7 +234,7 @@ public abstract class AbstractLanguageServerTest implements Endpoint {
       AnnotatedBindingBuilder<RequestManager> _bind = it.<RequestManager>bind(RequestManager.class);
       _bind.toInstance(new RequestManager() {
         @Override
-        public <V extends Object> CompletableFuture<V> runRead(final Function1<? super CancelIndicator, ? extends V> request) {
+        public synchronized <V extends Object> CompletableFuture<V> runRead(final Function1<? super CancelIndicator, ? extends V> request) {
           final CompletableFuture<V> result = new CompletableFuture<V>();
           try {
             final CancelIndicator _function = () -> {
@@ -253,7 +253,7 @@ public abstract class AbstractLanguageServerTest implements Endpoint {
         }
         
         @Override
-        public <U extends Object, V extends Object> CompletableFuture<V> runWrite(final Function0<? extends U> nonCancellable, final Function2<? super CancelIndicator, ? super U, ? extends V> request) {
+        public synchronized <U extends Object, V extends Object> CompletableFuture<V> runWrite(final Function0<? extends U> nonCancellable, final Function2<? super CancelIndicator, ? super U, ? extends V> request) {
           final CompletableFuture<V> result = new CompletableFuture<V>();
           try {
             final CancelIndicator _function = () -> {
