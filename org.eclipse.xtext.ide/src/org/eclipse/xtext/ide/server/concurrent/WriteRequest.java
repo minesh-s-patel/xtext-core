@@ -57,7 +57,7 @@ public class WriteRequest<U, V> extends AbstractRequest<V> {
 	}
 	
 	@Override
-	Logger getLogger() {
+	protected Logger getLogger() {
 		return LOG;
 	}
 

@@ -41,10 +41,10 @@ public class ReadRequest<V> extends AbstractRequest<V> {
 	}
 	
 	@Override
-	public void cancel() {
-		super.cancel();
-		if (initializer.cancel(true)) {
-			cancelResult();
+	protected void cancel(boolean mayInterruptIfRunning) {
+		super.cancel(mayInterruptIfRunning);
+		if (initializer.cancel(mayInterruptIfRunning)) {
+			cancelResult(mayInterruptIfRunning);
 		}
 	}
 	
@@ -72,7 +72,7 @@ public class ReadRequest<V> extends AbstractRequest<V> {
 	}
 	
 	@Override
-	Logger getLogger() {
+	protected Logger getLogger() {
 		return LOG;
 	}
 

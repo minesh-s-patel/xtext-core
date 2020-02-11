@@ -473,16 +473,14 @@ public class RequestManagerTest {
   @Test(timeout = 5000)
   @RepeatedTest(times = 50)
   public void testReadCommandSubmitsWriteCommand() {
-    abstract class __RequestManagerTest_1 extends RequestManager {
-      abstract void init(final ExecutorService parallel, final OperationCanceledManager operationCanceledManager);
-    }
-    
     try {
       final Thread mainThread = Thread.currentThread();
       final CountDownLatch submittedFromMain = new CountDownLatch(1);
       final CountDownLatch addedFromReader = new CountDownLatch(1);
       final AtomicReference<Thread> readerThreadRef = new AtomicReference<Thread>();
-      final __RequestManagerTest_1 myRequestManager = new __RequestManagerTest_1() {
+      ExecutorService _get = this.executorServiceProvider.get();
+      OperationCanceledManager _get_1 = this.cancelManagerProvider.get();
+      final RequestManager myRequestManager = new RequestManager(_get, _get_1) {
         @Override
         protected void addRequest(final AbstractRequest<?> request) {
           if (((request instanceof WriteRequest) && Objects.equal(Thread.currentThread(), readerThreadRef.get()))) {
@@ -517,13 +515,7 @@ public class RequestManagerTest {
           }
           return _xblockexpression;
         }
-        
-        void init(final ExecutorService parallel, final OperationCanceledManager operationCanceledManager) {
-          this.setOperationCanceledManager(operationCanceledManager);
-          this.setParallel(parallel);
-        }
       };
-      myRequestManager.init(this.executorServiceProvider.get(), this.cancelManagerProvider.get());
       final CountDownLatch threadSet = new CountDownLatch(1);
       final Function1<CancelIndicator, CompletableFuture<Object>> _function = (CancelIndicator it) -> {
         readerThreadRef.set(Thread.currentThread());

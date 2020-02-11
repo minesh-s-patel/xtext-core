@@ -32,12 +32,16 @@ import com.google.inject.Singleton;
 @Singleton
 public class RequestManager {
 
-	@Inject
-	private ExecutorService parallel;
+	private final ExecutorService parallel;
+
+	private final OperationCanceledManager operationCanceledManager;
 
 	@Inject
-	private OperationCanceledManager operationCanceledManager;
-
+	public RequestManager(ExecutorService parallel, OperationCanceledManager operationCanceledManager) {
+		this.parallel = parallel;
+		this.operationCanceledManager = operationCanceledManager;
+	}
+	
 	private final ExecutorService queue = Executors.newSingleThreadExecutor(
 			new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RequestManager-Queue-%d").build());
 
@@ -52,14 +56,14 @@ public class RequestManager {
 		cancel();
 	}
 	
-	protected void setParallel(ExecutorService parallel) {
-		this.parallel = parallel;
+	protected final OperationCanceledManager getOperationCanceledManager() {
+		return operationCanceledManager;
 	}
 	
-	protected void setOperationCanceledManager(OperationCanceledManager operationCanceledManager) {
-		this.operationCanceledManager = operationCanceledManager;
+	protected final ExecutorService getParallelExecutorService() {
+		return parallel;
 	}
-
+	
 	/**
 	 * Run the given cancellable logic as a read request.
 	 */

@@ -30,7 +30,7 @@ class RequestCancelIndicator implements CancelIndicator, CancelChecker, Cancella
 		request.cancel();
 	}
 
-	void doCancel() {
+	protected void doCancel() {
 		this.cancelled = true;
 	}
 

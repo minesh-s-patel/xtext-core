@@ -337,7 +337,7 @@ class RequestManagerTest {
 		val submittedFromMain = new CountDownLatch(1)
 		val addedFromReader = new CountDownLatch(1)
 		val AtomicReference<Thread> readerThreadRef = new AtomicReference 
-		val myRequestManager = new RequestManager() {
+		val myRequestManager = new RequestManager(executorServiceProvider.get, cancelManagerProvider.get) {
 			
 			override protected addRequest(AbstractRequest<?> request) {
 				if (request instanceof WriteRequest && Thread.currentThread == readerThreadRef.get) {
@@ -365,13 +365,7 @@ class RequestManagerTest {
 				super.cancel()
 			}
 			
-			def private void init(ExecutorService parallel, OperationCanceledManager operationCanceledManager) {
-				setOperationCanceledManager(operationCanceledManager)
-				setParallel(parallel)
-			}
-			
 		}
-		myRequestManager.init(executorServiceProvider.get, cancelManagerProvider.get)
 		val threadSet = new CountDownLatch(1)
 		val readResult = myRequestManager.runRead [
 			readerThreadRef.set(Thread.currentThread)

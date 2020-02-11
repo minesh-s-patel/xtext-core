@@ -23,12 +23,12 @@ public abstract class AbstractRequest<V> implements Runnable, Cancellable {
 	private class ResultFuture extends CompletableFuture<V> {
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
-			AbstractRequest.this.cancel();
+			AbstractRequest.this.cancel(mayInterruptIfRunning);
 			return isCancelled();
 		}
 
-		void doCancel() {
-			super.cancel(true);
+		void doCancel(boolean mayInterruptIfRunning) {
+			super.cancel(mayInterruptIfRunning);
 		}
 	}
 	
@@ -53,32 +53,36 @@ public abstract class AbstractRequest<V> implements Runnable, Cancellable {
 		this.cancelIndicator = new RequestCancelIndicator(this);
 	}
 
-	void cancelResult() {
-		result.doCancel();
+	protected void cancelResult(boolean mayInterruptIfRunning) {
+		result.doCancel(mayInterruptIfRunning);
 	}
 
-	boolean isDone() {
+	protected boolean isDone() {
 		return result.isDone();
 	}
 
-	void complete(V value) {
+	protected void complete(V value) {
 		result.complete(value);
 	}
 	
-	abstract Logger getLogger();
+	protected abstract Logger getLogger();
 
-	void completeExceptionally(Throwable t) {
+	protected void completeExceptionally(Throwable t) {
 		if (!requestManager.isCancelException(t)) {
 			getLogger().error("Error during request: ", t);
 			result.completeExceptionally(t);
 		} else {
-			cancelResult();
+			cancelResult(true);
 		}
 	}
 
-	@Override
-	public void cancel() {
+	protected void cancel(boolean mayInterruptIfRunning) {
 		cancelIndicator.doCancel();
+	}
+	
+	@Override
+	public final void cancel() {
+		cancel(true);
 	}
 
 	/**
