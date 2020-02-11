@@ -67,7 +67,7 @@ public abstract class AbstractRequest<V> implements Runnable, Cancellable {
 	
 	protected abstract Logger getLogger();
 
-	protected void completeExceptionally(Throwable t) {
+	protected void logAndCompleteExceptionally(Throwable t) {
 		if (!requestManager.isCancelException(t)) {
 			getLogger().error("Error during request: ", t);
 			result.completeExceptionally(t);

@@ -52,7 +52,7 @@ public class WriteRequest<U, V> extends AbstractRequest<V> {
 			V writeResult = cancellable.apply(cancelIndicator, intermediateResult);
 			complete(writeResult);
 		} catch (Throwable t) {
-			completeExceptionally(t);
+			logAndCompleteExceptionally(t);
 		}
 	}
 	

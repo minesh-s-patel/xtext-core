@@ -66,7 +66,7 @@ public class ReadRequest<V> extends AbstractRequest<V> {
 				V readResult = readOperation.apply(cancelIndicator);
 				complete(readResult);
 			} catch (Throwable t) {
-				completeExceptionally(t);
+				logAndCompleteExceptionally(t);
 			}
 		});
 	}
